@@ -8,6 +8,10 @@ output:
 ---
 
 
+```{r}
+library(distill)
+create_article("article.Rmd")
+```
 
 ## Project thoughts
 
