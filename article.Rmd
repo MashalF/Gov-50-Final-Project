@@ -1,0 +1,28 @@
+---
+title: "Gov 50 Final Project"
+description: |
+  
+I am interested in exploring data related to the Covid 19 Pandemic and the efficacy of Pharmaceutical and Non-Pharmaceutical interventions (lock downs, contact tracing etc.) in controlling the spread of the virus globally. I want to compare the effectiveness of these across different social groups by using categories like gender, country etc. 
+
+I am also interested in exploring data related to the Covid 19 Pandemic and the how that has impacted Gender equity, especially domestic violence against women in different countries. 
+author:
+  - name: Mashal Farrukh 
+    url: https://example.com/norajones
+    affiliation: Spacely Sprockets
+    affiliation_url: https://example.com/spacelysprokets
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Distill is a publication format for scientific and technical writing, native to the web. 
+
+Learn more about using Distill for R Markdown at <https://rstudio.github.io/distill>.
+
+
+
+
+
