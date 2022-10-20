@@ -8,11 +8,6 @@ output:
 ---
 
 
-```{r}
-library(distill)
-create_article("article.Rmd")
-```
-
 ## Project thoughts
 
 I am interested in exploring data related to the Covid 19 Pandemic and the efficacy of Pharmaceutical and Non-Pharmaceutical interventions (lock downs, contact tracing etc.) in controlling the spread of the virus globally. I want to compare the effectiveness of these across different social groups by using categories like gender, country etc. 
