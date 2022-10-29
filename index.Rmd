@@ -12,4 +12,14 @@ output:
 
 I am interested in exploring data related to the Covid 19 Pandemic and the efficacy of Pharmaceutical and Non-Pharmaceutical interventions (lock downs, contact tracing etc.) in controlling the spread of the virus globally. I want to compare the effectiveness of these across different social groups by using categories like gender, country etc. 
 
-I am also interested in exploring data related to the Covid 19 Pandemic and the how that has impacted Gender equity, especially domestic violence against women in different countries. 
+
+I Plan on using two data sets for my final project and I will combine them. 
+
+The links to these data sets are as follows: 
+https://catalog.data.gov/dataset/ah-provisional-covid-19-deaths-by-educational-attainment-race-sex-and-age
+https://catalog.data.gov/dataset/covid-19-vaccination-and-case-trends-by-age-group-united-states
+
+Research proposal:
+
+ How effective were the vaccination in reducing deaths by COVID across different age groups in the United States of America? My hypothesis is that the vaccines were quite effective in age groups that tend to have a higher immmunity, so people who are between ages 14-50 years. My outcome variable is the numbers of deaths that occur due to Covid and this is measured by counting the numbers of deaths that identifiably occured as a result of the Covid infection. I want to be able to explain variations in the outcome variable through variations in the vaccine administration and variations in the age group of the respondents. If the regression analysis that I do reveals that there is a connection between age group and the effectiveness of the vaccine then my hypothesis will be supported, but if the data reveals that the number of deaths that occur do not have a high correlation with the age of the people being studied then my hypothesis will be disproved. 
+
