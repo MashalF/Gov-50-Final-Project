@@ -26,16 +26,49 @@ library(tidyverse)
 library(readr)
 ```
 
+
 ```{r}
-Rel_cov <- ATP_W70 |> select (F_ATTEND, COVIDRF_W70, ATTENDMONTH_W70, ATTENDONLINE_W70, ATTENDFUT1_W70, ATTENDFUT2_W70, COVIDCONG2_W70, COVIDCONG3_W70, COVIDCONG4_W70, CONGRESTRICT1_a_W70, CONGRESTRICT1_b_W70, CONGRESTRICT1_c_W70, CONGRESTRICT1_d_W70, CONGRESTRICT2_a_W70, CONGRESTRICT2_b_W70, CONGRESTRICT2_c_W70, CONGRESTRICT2_d_W70, ATTENDCONF_W70, CONGDONATE_W70, ONLINESERV_W70, SERMONISSUE_a_W70, SERMONISSUE_b_W70, SERMONISSUE_c_W70, SERMONISSUE_d_W70, SERMONISSUE_e_W70,SERMONISSUE_f_W70, SERMONISSUE_g_W70, SERMONTRUMP_W70, SERMONBIDEN_W70, COVIDLESSON1_W70, COVIDLESSON2_W70, PARTY_W70, PARTYLN_W70, PARTYSTR_W70) |>mutate(Opinions_on_SD = case_when(COVIDCONG4_W70 == 1 ~ "Open", COVIDCONG4_W70 == 2 ~ "Open with restictions", COVIDCONG4_W70 == 3 ~ "Closed"))
+ATP_W70 <- read.csv("ATP_W70FromR.csv")
+```
+
+```{r}
+ATP_W70 <- ATP_W70 |> mutate (Pray = case_when(SPIRIT2_a_W70 >=1 & SPIRIT2_a_W70 <= 4 ~ '1')) |> mutate(Scripture = case_when(SPIRIT2_b_W70 >=1 & SPIRIT2_b_W70 <= 4 ~ '1')) |> mutate (Meditate = case_when(SPIRIT1_a_W70 >=1 & SPIRIT1_a_W70 <= 4 ~ '1')) 
 ```
 
 
 ```{r}
-Opinions <- Rel_cov |>mutate (PARTY_affliation = case_when(PARTY_W70 == 1 ~ "Republican", PARTY_W70 == 2 ~ "Democrat", PARTY_W70 == 3 ~ "Independent", PARTY_W70 == 4 ~ "Something else")) |> group_by( PARTY_affliation, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> drop_na( PARTY_affliation, Opinions_on_SD)
+ATP_W70 <- ATP_W70 |> mutate(Opinions_on_SD = case_when(COVIDCONG4_W70 == 1 ~ "Open", COVIDCONG4_W70 == 2 ~ "Open with restictions", COVIDCONG4_W70 == 3 ~ "Closed"))|> mutate (college_edu = ifelse(F_EDUCCAT == 1, "College", "Not College")) |> mutate (PARTY_affliation = case_when(PARTY_W70 == 1 ~ "Republican", PARTY_W70 == 2 ~ "Democrat", PARTY_W70 == 3 ~ "Independent", PARTY_W70 == 4 ~ "Something else")) |> filter (PARTY_affliation %in% c("Republican", "Democrat"))
+```
+```{r}
+Opinions <- ATP_W70 |> group_by( PARTY_affliation, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> drop_na( PARTY_affliation, Opinions_on_SD)
 
-
+```{r}
 Opinions_plot <- Opinions |> ggplot(aes(x = Opinions_on_SD, y = prop, fill = PARTY_affliation)) + geom_col() + labs( X= "opinions on what the operatings status of places of worship should be according to Party affliation")
 
 Opinions_plot
 ```
+
+
+```{r}
+
+Opinions_diff_by_edu <- ATP_W70 |> filter (PARTY_affliation %in% c("Republican", "Democrat")) |> group_by(PARTY_affliation, college_edu, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> drop_na(Opinions_on_SD, PARTY_affliation) |> select (-n)|> pivot_wider(names_from = PARTY_affliation, values_from = prop) |> mutate (Diff_in_prop = Republican - Democrat)
+knitr:: kable (Opinions_diff_by_edu)
+
+Opinions_by_educ_plot <- Opinions_diff_by_edu|> ggplot(aes(x = Opinions_on_SD, y = Diff_in_prop, fill =  college_edu)) + geom_col(position = "dodge") + labs( X= "opinions on what the operatings status of places of worship should be according to Party affliation and college education")
+
+Opinions_by_educ_plot
+```
+
+```
+
+
+```{r}
+Opinions_plot <- Opinions |> ggplot(aes(x = Opinions_on_SD, y = prop, fill = PARTY_affliation)) + geom_col() + labs( X= "opinions on what the operatings status of places of worship should be according to Party affliation")
+
+Opinions_plot
+```
+
+```{r}
+
+```
+
