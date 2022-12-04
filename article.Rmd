@@ -29,20 +29,27 @@ library(readr)
 
 ```{r}
 ATP_W70 <- read.csv("ATP_W70FromR.csv")
+library(tidyverse)
 ```
 
 ```{r}
-ATP_W70 <- ATP_W70 |> mutate (Pray = case_when(SPIRIT2_a_W70 >=1 & SPIRIT2_a_W70 <= 4 ~ '1')) |> mutate(Scripture = case_when(SPIRIT2_b_W70 >=1 & SPIRIT2_b_W70 <= 4 ~ '1')) |> mutate (Meditate = case_when(SPIRIT1_a_W70 >=1 & SPIRIT1_a_W70 <= 4 ~ '1')) 
+ATP_W70 <- ATP_W70 |> mutate (Pray = case_when(SPIRIT2_a_W70 >=1 & SPIRIT2_a_W70 <= 4 ~ '1')) |> mutate(Scripture = case_when(SPIRIT2_b_W70 >=1 & SPIRIT2_b_W70 <= 4 ~ '1')) |> mutate (Meditate = case_when(SPIRIT1_a_W70 >=1 & SPIRIT1_a_W70 <= 4 ~ '1')) |> mutate (spirtuality = ifelse (Pray == 1| Scripture == 1| Meditate == 1, "1", "0")) 
+
+
 ```
 
 
 ```{r}
-ATP_W70 <- ATP_W70 |> mutate(Opinions_on_SD = case_when(COVIDCONG4_W70 == 1 ~ "Open", COVIDCONG4_W70 == 2 ~ "Open with restictions", COVIDCONG4_W70 == 3 ~ "Closed"))|> mutate (college_edu = ifelse(F_EDUCCAT == 1, "College", "Not College")) |> mutate (PARTY_affiliation = case_when(PARTY_W70 == 1 ~ "Republican", PARTY_W70 == 2 ~ "Democrat", PARTY_W70 == 3 ~ "Independent", PARTY_W70 == 4 ~ "Something else")) |> filter (PARTY_affiliation %in% c("Republican", "Democrat"))
+ATP_W70 <- ATP_W70 |> mutate(Opinions_on_SD = case_when(COVIDCONG4_W70 == 1 ~ "Open", COVIDCONG4_W70 == 2 ~ "Open with restictions", COVIDCONG4_W70 == 3 ~ "Closed"))|> mutate (college_edu = ifelse(F_EDUCCAT == 1, "College", "Not College")) |> mutate (PARTY_affiliation = case_when(PARTY_W70 == 1 ~ "Republican", PARTY_W70 == 2 ~ "Democrat", PARTY_W70 == 3 ~ "Independent", PARTY_W70 == 4 ~ "Something else")) |> mutate (Black = if_else(F_RACECMB == 2, "1", "0")) |> mutate(Ideology = case_when(F_IDEO > 0 & F_IDEO < 3 ~ "Conservative", F_IDEO == 3 ~ "Moderate", F_IDEO > 3 & F_IDEO < 5 ~ "Liberal")) 
+
+Opinions_final <- ATP_W70 |> drop_na(Opinions_on_SD) |> select(Opinions_on_SD, COVIDCONG4_W70, college_edu, PARTY_affiliation, Black, F_IDEO, Ideology, spirtuality) |> filter (PARTY_affiliation %in% c("Republican", "Democrat"))
+
+Opinions_final  
 ```
 
 ##visualization 1
 ```{r}
-Opinions <- ATP_W70 |> group_by( PARTY_affiliation, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> drop_na( PARTY_affiliation, Opinions_on_SD) 
+Opinions <- Opinions_final |> group_by( PARTY_affiliation, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> drop_na( PARTY_affiliation, Opinions_on_SD) 
 
 
 Opinions_plot <- Opinions |> ggplot(aes(x = Opinions_on_SD, y = prop, fill = PARTY_affiliation)) + geom_col(position = "dodge") + labs( Title =  "opinions on what the operatings status of places of worship should be according to Party affiliation")
@@ -52,12 +59,42 @@ Opinions_plot
 Visualisation # 2
 ```{r}
 
-Opinions_diff_by_edu <- ATP_W70 |> filter (PARTY_affliation %in% c("Republican", "Democrat")) |> group_by(PARTY_affiliation, college_edu, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> drop_na(Opinions_on_SD, PARTY_affiliation) |> select (-n)|> pivot_wider(names_from = PARTY_affiliation, values_from = prop) |> mutate (Diff_in_prop = Republican - Democrat)
+Opinions_diff_by_edu <- Opinions_final |> filter (PARTY_affiliation %in% c("Democrat", "Republican")) |> group_by(PARTY_affiliation, college_edu, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> pivot_wider(names_from = PARTY_affiliation, values_from = prop) 
+
+#|> drop_na(Opinions_on_SD, PARTY_affiliation) 
 knitr:: kable (Opinions_diff_by_edu)
 
-Opinions_by_educ_plot <- Opinions_diff_by_edu|> ggplot(aes(x = Opinions_on_SD, y = Diff_in_prop, fill =  college_edu)) + geom_col(position = "dodge") + labs( Title = "opinions on what the operatings status of places of worship should be according to Party affiliation and college education")
+Opinions_by_educ_plot <- Opinions_diff_by_edu|> ggplot(aes(x = Opinions_on_SD, y = Democrat, fill =  college_edu)) + geom_col(position = "dodge") + labs( Title = "opinions on what the operatings status of places of worship should be according to Party affiliation and college education")
 
 Opinions_by_educ_plot
+```
+```{r}
+
+Opinions_diff_by_edu_rep <- Opinions_final |> filter (PARTY_affiliation %in% c("Democrat", "Republican")) |> group_by(PARTY_affiliation, college_edu, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> select (-n)|> pivot_wider(names_from = PARTY_affiliation, values_from = prop) 
+
+#|> drop_na(Opinions_on_SD, PARTY_affiliation) 
+knitr:: kable (Opinions_diff_by_edu_rep)
+
+Opinions_by_educ_plot_rep <- Opinions_diff_by_edu_rep|> ggplot(aes(x = Opinions_on_SD, y = Republican, fill =  college_edu)) + geom_col(position = "dodge") + labs( Title = "opinions on what the operatings status of places of worship should be according to Party affiliation and college education")
+
+Opinions_by_educ_plot_rep
+```
+```{r}
+ATP_W70_TEST |> mutate(Opinions_on_SD_numeric = case_when(COVIDCONG4_W70 == 1 ~ "1", COVIDCONG4_W70 == 2 ~ "0", COVIDCONG4_W70 == 3 ~ "-1")) |> mutate (Party_binary = case_when(PARTY_W70 == 1 ~ "1", PARTY_W70 == 2 ~ "0")) |> select (Party_binary, PARTY_W70) 
+```
+
+```{r}
+library(tidyverse)
+ATP_W70_TEST <- ATP_W70 |> drop_na(COVIDCONG4_W70)
+
+sing_Regression <- lm(Opinions_on_SD_numeric ~ party_binary, data = ATP_W70_TEST)
+summary(sing_Regression)
+
+```
+
+
+```{r}
+Mult_regression <- lm(Opinions_on_SD ~ party-binary + Black + college_edu + spirtuality, data = ATP_W70)
 ```
 
 My research question aims to explore whether Party affiliations have any impact on people's opinions on the operating status of their houses of worship. For this, I am looking at the responses of those people who have a tendency to attend religious services. My main explanatory variable is Party affiliations and my outcome variable is opinions on social distancing (Opinions_on_SD). Since this is a cross-sectional research design and I cannot randomize my experiment fully, I want to control for the factors that could possibly confound my analysis. Some of these include education levels of the respondents, the race, as well as inherent spirituality.  
