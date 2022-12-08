@@ -35,10 +35,9 @@ library(tidyverse)
 library(readr)
 ```
 
-
 ```{r}
-install.packages("broom")
-library(tidy)
+library(broom)
+library(tidyr)
 ```
 
 
@@ -105,6 +104,8 @@ Opinions_final|> select (COVIDCONG4_W70, Opinions_on_SD_numeric, ColEducation_bi
 sing_Regression <- lm(Opinions_on_SD_numeric ~ PARTY_affiliation, data = Opinions_final)
 summary(sing_Regression)
 
+var_labs <- c("(Intercept)" = "Intercept", "PARTY_affiliationRepublican" = "Republican Party")
+modelsummary::modelsummary(list(sing_Regression), coef_map = var_labs, gof_map= ("nobs"))
 ```
 Average support for opening houses of worship is negative 0.488 when the main explanatory variable (Party affiliation) is zero. This means, when a particular respondent is not a Republican their predicted support for opening houses of worship is negative and it can be predicted that they would want places of worship to remain closed, given all else remains constant.  
 
@@ -118,15 +119,18 @@ Both the intercept and the coefficient for party affiliation are statistically s
 Mult_regression <- lm(Opinions_on_SD_numeric ~ PARTY_affiliation + Black + ColEducation_binary + spirtuality, data = Opinions_final)
 summary(Mult_regression)
 
-modelsummary::modelsummary(list(sing_Regression, Mult_regression), gof_map("nobs"))
+
+var_labels <- c( "(Intercept)" = "Intercept", "PARTY_affiliationRepublican" = "Republican Party", "Black1" = "Black", "ColEducation_binary1" = "College graduate", "spirtuality1" = "Spirituality")
+
+modelsummary::modelsummary(list(sing_Regression, Mult_regression), coef_map = var_labels, gof_map= ("nobs"))
 ```
 
 Average support for opening houses of worship is negative 0.401 when the all explanatory variables (Party affiliation, Black, ColEducation_binary and spirituality) are zero. This means, when a particular respondent is not a Republican, not a black person, are not a college graduate and do not engage in any spiritual practices their predicted support for opening houses of worship is negative and it can be predicted that they would want places of worship to remain closed.  
 
-For the coefficients, since all the explanatory variables used here are binary, our model predicts that if a person goes from being a non-Republican (in this case a Democrat) to a Republican, their predicted support for opening up places of worship during the pandemic would increase by 0.51 points, given all else remains constant. This means that on average becoming a republican is predicted to be associated with a rise in support for opening places of worship, given all other variables remain unchanged. 
-Similarly, being a black person is associated with a decrease in the predicted support for the opening of places of worship by 0.019 points, given all other variables remain constant. 
+For the coefficients, since all the explanatory variables used here are binary, our model predicts that if a person goes from being a non-Republican (in this case a Democrat) to a Republican, their predicted support for opening up places of worship during the pandemic would increase by 0.514 points, given all else remains constant. This means that on average becoming a republican is predicted to be associated with a rise in support for opening places of worship, given all other variables remain unchanged. 
+Similarly, being a black person is associated with a decrease in the predicted support for the opening of places of worship by 0.02 points, given all other variables remain constant. 
 Being a college graduate is associated with a decrease in the predicted support for the opening of places of worship by 0.14 points, given all other variables remain constant. 
-And lastly, being someone who engages in some form of spiritual practice (prayer, reading scripture, meditation) is associated with an increase in the predicted support for the opening of places of worship by 0.0021, given all other variables remain constant. 
+And lastly, being someone who engages in some form of spiritual practice (prayer, reading scripture, meditation) is associated with an increase in the predicted support for the opening of places of worship by 0.002, given all other variables remain constant. 
 
 It should be noted that the coefficients for Black and spirituality are not statistically significant since their p value is greater than 0.05. All the other coefficients are statistically significant. This implies that the association between these two variables and the predicted support for the opening of places of worship during the pandemic are not statistical significant. The coefficients for all the other variables are statistically significant at the 0.05 significance level and are therefore not zero. 
 
