@@ -7,19 +7,137 @@ output:
     self_contained: false
 ---
 
+---
+title: "Gov 50 Final Project"
+description: |
+  
+author:
+  - name: Mashal Farrukh 
+    url: https://example.com/norajones
+    affiliation: Spacely Sprockets
+    affiliation_url: https://example.com/spacelysprokets
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
 
-## Project thoughts
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
 
-I am interested in exploring data related to the Covid 19 Pandemic and the efficacy of Pharmaceutical and Non-Pharmaceutical interventions (lock downs, contact tracing etc.) in controlling the spread of the virus globally. I want to compare the effectiveness of these across different social groups by using categories like gender, country etc. 
+Introduction
+
+My research question aims to explore whether Party affiliations have any impact on people's opinions on the operating status of their houses of worship during the pandemic. For this, I am looking at the responses of those people who have a tendency to attend religious services. The data set that I chose to use is from the PEW Research Center and is called the American Trends Panel Wave 70. The data set focuses on Religion in public life, social media’s role in politics and society, COVID-19 contact tracing, and the data in it was collected during July 13 – July 20, 2020. 
+
+Variables
+
+My outcome variable is Opinions on social distancing which is an indication of how supportive people are of the opening places of worship during the pandemic. 'Opinions_on_SD' takes three values, 'Open', 'Open with restrictions' and 'Closed'. The numeric version of this variable, 'Opinions_on_SD_numeric' assigns '1' to 'Open', '0' to 'Open with restrictions' and '-1' to 'Closed'. I created this variable using the COVIDCONG4_W70 from the original data set. 
+In the US, people's political affiliations tend to be highly informed by their ideological leanings with more conservative people generally being in the Republican Party, and liberal minded people joining the Democratic Party to the point that Conservative and Republican/ Liberal and Democrat are used in a synonymous way.  So party affiliation is my main explanatory variable. 
+My main explanatory variable comprises of "Republican", "Democrat", "Independent" and "Something Else" and I have filtered it down to the main political affiliations I am interested in looking at, i.e. Republican and Democrat. I formulated this variable using the PARTY_W70 variable from the original data set. 
+Since this is a cross-sectional research design and I cannot randomize my experiment fully, I want to control for the factors that could possibly confound my analysis. Some of these include education levels of the respondents, the race, as well as tendency to engage in spiritual practices.  The rationale for each of these variables is as follows:
+*The level of education could impact what people's opinions are on social distancing and the operational status of places of worship, so it order to prevent this from confounding my analysis of the impact of Party affiliation on people's support for opening the places of worship, I include college_edu in my regression. This variable comprises of "College" and "Non College" for those who completed college and those who did not respectively. 
+*According a PEW research survey (https://www.pewresearch.org/politics/2020/04/14/health-concerns-from-covid-19-much-higher-among-hispanics-and-blacks-than-whites/), Black people were, on average, more susceptible to the virus compared to white people, and so I wanted to control for any possible confounding effect of being black on the support for opening places of worship. The Black variable used here is a binary variable, and takes "1" if respondent is Black and "0" otherwise. 
+*Whether respondents were spiritual or not could also impact their support for opening places of worship. This is why I controlled for the effect of spirituality on people's opinions on the operational status of places of worship. I formulated this variable by seeing if the respondents reportedly engaged in Prayer, reading scripture or meditation during the pandemic, and formulated a binary variable "spirituality" if they did at least one of these activities. 
+
+```{r}
+library(tidyverse)
+library(readr)
+```
+
+```{r}
+library(broom)
+library(tidyr)
+```
 
 
-I Plan on using two data sets for my final project and I will combine them. 
+```{r}
+ATP_W70 <- read.csv("ATP_W70FromR.csv")
+library(tidyverse)
+```
 
-The links to these data sets are as follows: 
-https://catalog.data.gov/dataset/ah-provisional-covid-19-deaths-by-educational-attainment-race-sex-and-age
-https://catalog.data.gov/dataset/covid-19-vaccination-and-case-trends-by-age-group-united-states
+```{r}
+ATP_W70 <- ATP_W70 |> mutate (Pray = if_else(SPIRIT2_a_W70 >=1 & SPIRIT2_a_W70 <= 4, "1", "0")) |> mutate(Scripture = if_else(SPIRIT2_b_W70 >=1 & SPIRIT2_b_W70 <= 4, "1", "0")) |> mutate (Meditate = if_else(SPIRIT1_a_W70 >=1 & SPIRIT1_a_W70 <= 4, "1", "0")) |> mutate (spirtuality = ifelse (Pray == 1| Scripture == 1| Meditate == 1, "1", "0")) 
+ATP_W70 |>select(Pray, Scripture, Meditate, spirtuality)
+```
 
-Research proposal:
 
- How effective were the vaccination in reducing deaths by COVID across different age groups in the United States of America? My hypothesis is that the vaccines were quite effective in age groups that tend to have a higher immmunity, so people who are between ages 14-50 years. My outcome variable is the numbers of deaths that occur due to Covid and this is measured by counting the numbers of deaths that identifiably occured as a result of the Covid infection. I want to be able to explain variations in the outcome variable through variations in the vaccine administration and variations in the age group of the respondents. If the regression analysis that I do reveals that there is a connection between age group and the effectiveness of the vaccine then my hypothesis will be supported, but if the data reveals that the number of deaths that occur do not have a high correlation with the age of the people being studied then my hypothesis will be disproved. 
+```{r}
+ATP_W70 <- ATP_W70 |> mutate(Opinions_on_SD = case_when(COVIDCONG4_W70 == 1 ~ "Open", COVIDCONG4_W70 == 2 ~ "Open with restictions", COVIDCONG4_W70 == 3 ~ "Closed"))|> mutate (college_edu = ifelse(F_EDUCCAT == 1, "College", "Not College")) |> mutate (PARTY_affiliation = case_when(PARTY_W70 == 1 ~ "Republican", PARTY_W70 == 2 ~ "Democrat", PARTY_W70 == 3 ~ "Independent", PARTY_W70 == 4 ~ "Something else")) |> mutate (Black = if_else(F_RACECMB == 2, "1", "0")) |> mutate(Ideology = case_when(F_IDEO > 0 & F_IDEO < 3 ~ "Conservative", F_IDEO == 3 ~ "Moderate", F_IDEO > 3 & F_IDEO < 5 ~ "Liberal")) 
+Opinions_final <- ATP_W70 |> drop_na(Opinions_on_SD, COVIDCONG4_W70, PARTY_affiliation) |> select(Opinions_on_SD, COVIDCONG4_W70, college_edu, PARTY_affiliation, PARTY_W70, Black, F_IDEO, Ideology, spirtuality) |> filter (PARTY_affiliation %in% c("Republican", "Democrat"))
+Opinions_final  
+```
 
+
+##visualization 1
+```{r}
+Opinions <- Opinions_final |> group_by( PARTY_affiliation, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> select(-n)
+knitr::kable (Opinions)
+Opinions_plot <- Opinions |> ggplot(aes(x = prop, y= Opinions_on_SD, fill = PARTY_affiliation)) + geom_col(position = "dodge") + labs( x= "Proportions", y = "Opinions on operational status of places of worship", title = "Support for opening places of worship according to party affiliation")
+Opinions_plot
+```
+Plots used:
+I used three plots for this project. The first plot is a simple barplot that shows the relationship between Party affiliation and Opinions on the operational status of houses of worship. As the plot demonstrates, the highest proportion corresponds to respondents who identified as Republicans and were in favor of 'open with restrictions'. The democrats had the highest proportions for either 'closed' or 'open with restrictions'. Both Republicans and Democrats, had low corresponding proportions for 'open'. Overall, the graph shows that Republicans on average were in favor of opening spaces of worship with some restrictions in place, whereas Democrats were generally supportive of opening places of worship with restrictions in place, but most of them preferred keeping the places of worship closed.  
+
+
+```{r}
+Opinions_diff_by_edu <- Opinions_final |> group_by(PARTY_affiliation, college_edu, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> select(-n) |> pivot_wider(names_from = PARTY_affiliation, values_from = prop) 
+knitr:: kable (Opinions_diff_by_edu)
+Opinions_by_educ_plot_Dem <- Opinions_diff_by_edu|> ggplot(aes(x = Democrat, y = Opinions_on_SD, fill =  college_edu)) + geom_col(position = "dodge") + labs( x= "Democrats", y = "Opinions on operational status of places of worship", title = "Opinions according to Party affiliation and college education")
+Opinions_by_educ_plot_Dem
+Opinions_by_educ_plot_rep <- Opinions_diff_by_edu|> ggplot(aes(x = Republican, y = Opinions_on_SD, fill =  college_edu)) + geom_col(position = "dodge") + labs( x= "Republicans", y = "Opinions on operational status of places of worship", title = "Opinions according to Party affiliation and college education")
+Opinions_by_educ_plot_rep
+```
+The second and third plots demonstrate how the relationship between party affiliation and support for opening places of worship varies according to education levels. The first plot shows that in the case of Democrats, most college graduates preferred places of worship remaining closed, whereas most non-graduates preferred either places of worship being closed, or open with restrictions, with the former having a slightly lower proportion than the latter. The second plot shows that in the case of Republicans, both college graduates and non college graduates have the highest proportions for 'open with restrictions'. So, in case of Democrats, there is some variation when we compare college and non-college graduates, but in the case of Republicans there isn't much variation between college and non-college graduates. 
+ The visualization and the table show that having attained college education does not drastically change the trend that we observed in the first visualization. Adding the education variables enables us to see how the differences in proportion varies across college graduates and non-graduates and adds more precision to our analysis. 
+
+```{r}
+Opinions_final <- Opinions_final |> mutate(Opinions_on_SD_numeric = case_when(COVIDCONG4_W70 == 1 ~ "1", COVIDCONG4_W70 == 2 ~ "0", COVIDCONG4_W70 == 3 ~ "-1")) |> mutate(ColEducation_binary = if_else(college_edu == "College", "1", "0"))
+Opinions_final|> select (COVIDCONG4_W70, Opinions_on_SD_numeric, ColEducation_binary) 
+```
+
+```{r}
+sing_Regression <- lm(Opinions_on_SD_numeric ~ PARTY_affiliation, data = Opinions_final)
+summary(sing_Regression)
+var_labs <- c("(Intercept)" = "Intercept", "PARTY_affiliationRepublican" = "Republican Party")
+modelsummary::modelsummary(list(sing_Regression), coef_map = var_labs, gof_map= ("nobs"))
+```
+Average support for opening houses of worship is negative 0.488 when the main explanatory variable (Party affiliation) is zero. This means, when a particular respondent is not a Republican their predicted support for opening houses of worship is negative and it can be predicted that they would want places of worship to remain closed, given all else remains constant.  
+
+For the coefficient on party affiliation, since the main explanatory variables used here is a binary, our model predicts that if a person goes from being a non-Republican (in this case a democrat) to a Republican, their predicted support for opening up places of worship during the pandemic would increase by 0.528 points, given all else remains constant. This means that on average becoming a Republican is predicted to be associated with a rise in support for opening places of worship, given all else remains unchanged. 
+
+Both the intercept and the coefficient for party affiliation are statistically significant at the 0.05 level in this analysis.  
+
+
+
+```{r}
+Mult_regression <- lm(Opinions_on_SD_numeric ~ PARTY_affiliation + Black + ColEducation_binary + spirtuality, data = Opinions_final)
+summary(Mult_regression)
+var_labels <- c( "(Intercept)" = "Intercept", "PARTY_affiliationRepublican" = "Republican Party", "Black1" = "Black", "ColEducation_binary1" = "College graduate", "spirtuality1" = "Spirituality")
+modelsummary::modelsummary(list(sing_Regression, Mult_regression), coef_map = var_labels, gof_map= ("nobs"))
+```
+
+Average support for opening houses of worship is negative 0.401 when the all explanatory variables (Party affiliation, Black, ColEducation_binary and spirituality) are zero. This means, when a particular respondent is not a Republican, not a black person, are not a college graduate and do not engage in any spiritual practices their predicted support for opening houses of worship is negative and it can be predicted that they would want places of worship to remain closed.  
+
+For the coefficients, since all the explanatory variables used here are binary, our model predicts that if a person goes from being a non-Republican (in this case a Democrat) to a Republican, their predicted support for opening up places of worship during the pandemic would increase by 0.514 points, given all else remains constant. This means that on average becoming a republican is predicted to be associated with a rise in support for opening places of worship, given all other variables remain unchanged. 
+Similarly, being a black person is associated with a decrease in the predicted support for the opening of places of worship by 0.02 points, given all other variables remain constant. 
+Being a college graduate is associated with a decrease in the predicted support for the opening of places of worship by 0.14 points, given all other variables remain constant. 
+And lastly, being someone who engages in some form of spiritual practice (prayer, reading scripture, meditation) is associated with an increase in the predicted support for the opening of places of worship by 0.002, given all other variables remain constant. 
+
+It should be noted that the coefficients for Black and spirituality are not statistically significant since their p value is greater than 0.05. All the other coefficients are statistically significant. This implies that the association between these two variables and the predicted support for the opening of places of worship during the pandemic are not statistical significant. The coefficients for all the other variables are statistically significant at the 0.05 significance level and are therefore not zero. 
+
+Although there appears to be a statistically significant correlation between the main explanatory variable, i.e. Party affiliation (being republican to be specific) and support for opening places of worship during the pandemic, it would not be plausible to make causal claims here. This is because there are several factors that could possibly confound the results of this analysis and there does not seem to be enough information available to us to establish a causal connection between party affiliation and support for opening places of worship. For example, the personal experiences of a respondent with COVID (having gotten the virus themselves or seeing a friend/ family member get it) might be negatively correlated with support for opening places of worship regardless of party affiliation. Hence, despite our model showing a statistically significant positive correlation between our explanatory and outcome variable, suggesting causality in this case would not be plausible. 
+
+
+Conclusion
+
+This project looked at the relationship between party affiliation and support for opening up places of worship during the pandemic among respondents. A basic plot of this relationship demonstrated that on average the Republicans favored opening places of worship, albeit with restrictions in place, whereas Democrats were, on average, in favor of having the places either open with restrictions or closed altogether, with the proportion of Democrats wanting the latter being higher than the former. The next two plots demonstrated that including the education variable in our analysis gave a more nuanced depiction of how the support for opening places of worship varied across college and non-college graduates for both Republicans and Democrats (with the variation being more visible for the Democrats as compared to the Republicans). 
+The single regression is our analysis produced a statistically significant correlation between being a Republican and support for opening of the places of worship. The multiple regression in our analysis, which had party affiliation as the main explanatory variable, and Black, College education (ColEducation_binary) and spirituality as other explanatory variables also produced a statistically significant positive correlation between being a Republican and showing support for the opening of places of worship. However, despite these results we cannot establish a causal link between party affiliation and support for opening places of worship during the pandemic because there are a range of other factors that could influence a respondents support for the opening of the places of worship including immunity to the disease or personal experiences. 
+The limitations of this study then are the lack of information on all possible factors that could impact a person's support for opening up places of worship. In an ideal setting we would have information on all these factors and then could predict how a change in party affiliation could *cause* a change in a person's opinions on the operational status of places of worship during the pandemic. This study can be improved by including more variables for factors like personal experiences with COVID, immunity against the disease, vaccination status, so on and so forth. While including these variable will not lead to establishing a causal connection, they would add more depth and precision to our current analysis, allowing us to predict the relationship between the outcome and explanatory variable with more accuracy. 
+
+
+
+
+Footer
+© 2022 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
