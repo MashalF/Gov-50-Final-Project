@@ -76,7 +76,7 @@ Opinions_final <- ATP_W70 |> drop_na(Opinions_on_SD, COVIDCONG4_W70, PARTY_affil
 ```{r}
 Opinions <- Opinions_final |> group_by( PARTY_affiliation, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> select(-n)
 knitr::kable (Opinions)
-Opinions_plot <- Opinions |> ggplot(aes(x = prop, y= Opinions_on_SD, fill = PARTY_affiliation)) + geom_col(position = "dodge") + labs( x= "Proportions", y = "Opinions on operational status of places of worship", title = "Opinions according to party affiliation")
+Opinions_plot <- Opinions |> ggplot(aes(x = prop, y= Opinions_on_SD, fill = PARTY_affiliation)) + geom_col(position = "dodge") + labs( x= "Proportions", y = "Opinions on operational status of places of worship", title = "Opinions according to Party affiliation")
 Opinions_plot
 ```
 
