@@ -56,14 +56,14 @@ library(tidyverse)
 
 ```{r}
 ATP_W70 <- ATP_W70 |> mutate (Pray = if_else(SPIRIT2_a_W70 >=1 & SPIRIT2_a_W70 <= 4, "1", "0")) |> mutate(Scripture = if_else(SPIRIT2_b_W70 >=1 & SPIRIT2_b_W70 <= 4, "1", "0")) |> mutate (Meditate = if_else(SPIRIT1_a_W70 >=1 & SPIRIT1_a_W70 <= 4, "1", "0")) |> mutate (spirtuality = ifelse (Pray == 1| Scripture == 1| Meditate == 1, "1", "0")) 
-ATP_W70 |>select(Pray, Scripture, Meditate, spirtuality)
+
 ```
 
 
 ```{r}
 ATP_W70 <- ATP_W70 |> mutate(Opinions_on_SD = case_when(COVIDCONG4_W70 == 1 ~ "Open", COVIDCONG4_W70 == 2 ~ "Open with restictions", COVIDCONG4_W70 == 3 ~ "Closed"))|> mutate (college_edu = ifelse(F_EDUCCAT == 1, "College", "Not College")) |> mutate (PARTY_affiliation = case_when(PARTY_W70 == 1 ~ "Republican", PARTY_W70 == 2 ~ "Democrat", PARTY_W70 == 3 ~ "Independent", PARTY_W70 == 4 ~ "Something else")) |> mutate (Black = if_else(F_RACECMB == 2, "1", "0")) |> mutate(Ideology = case_when(F_IDEO > 0 & F_IDEO < 3 ~ "Conservative", F_IDEO == 3 ~ "Moderate", F_IDEO > 3 & F_IDEO < 5 ~ "Liberal")) 
 Opinions_final <- ATP_W70 |> drop_na(Opinions_on_SD, COVIDCONG4_W70, PARTY_affiliation) |> select(Opinions_on_SD, COVIDCONG4_W70, college_edu, PARTY_affiliation, PARTY_W70, Black, F_IDEO, Ideology, spirtuality) |> filter (PARTY_affiliation %in% c("Republican", "Democrat"))
-Opinions_final  
+
 ```
 
 
@@ -91,7 +91,7 @@ The second and third plots demonstrate how the relationship between party affili
 
 ```{r}
 Opinions_final <- Opinions_final |> mutate(Opinions_on_SD_numeric = case_when(COVIDCONG4_W70 == 1 ~ "1", COVIDCONG4_W70 == 2 ~ "0", COVIDCONG4_W70 == 3 ~ "-1")) |> mutate(ColEducation_binary = if_else(college_edu == "College", "1", "0"))
-Opinions_final|> select (COVIDCONG4_W70, Opinions_on_SD_numeric, ColEducation_binary) 
+
 ```
 
 ```{r}
