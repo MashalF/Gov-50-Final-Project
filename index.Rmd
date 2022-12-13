@@ -67,7 +67,8 @@ Opinions_final <- ATP_W70 |> drop_na(Opinions_on_SD, COVIDCONG4_W70, PARTY_affil
 ```
 
 
-##visualization 1
+## visualization 1
+
 ```{r}
 Opinions <- Opinions_final |> group_by( PARTY_affiliation, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> select(-n)
 knitr::kable (Opinions)
