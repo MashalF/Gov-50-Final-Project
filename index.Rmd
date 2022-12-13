@@ -67,7 +67,6 @@ Opinions_final <- ATP_W70 |> drop_na(Opinions_on_SD, COVIDCONG4_W70, PARTY_affil
 ```
 
 
-## visualization 1
 
 ```{r}
 Opinions <- Opinions_final |> group_by( PARTY_affiliation, Opinions_on_SD) |> summarise(n= n()) |> mutate (prop = n/ sum(n)) |> select(-n)
@@ -75,6 +74,7 @@ knitr::kable (Opinions)
 Opinions_plot <- Opinions |> ggplot(aes(x = prop, y= Opinions_on_SD, fill = PARTY_affiliation)) + geom_col(position = "dodge") + labs( x= "Proportions", y = "Opinions on operational status of places of worship", title = "Support for opening places of worship according to party affiliation")
 Opinions_plot
 ```
+
 Plots used:
 I used three plots for this project. The first plot is a simple barplot that shows the relationship between Party affiliation and Opinions on the operational status of houses of worship. As the plot demonstrates, the highest proportion corresponds to respondents who identified as Republicans and were in favor of 'open with restrictions'. The democrats had the highest proportions for either 'closed' or 'open with restrictions'. Both Republicans and Democrats, had low corresponding proportions for 'open'. Overall, the graph shows that Republicans on average were in favor of opening spaces of worship with some restrictions in place, whereas Democrats were generally supportive of opening places of worship with restrictions in place, but most of them preferred keeping the places of worship closed.  
 
@@ -101,6 +101,7 @@ summary(sing_Regression)
 var_labs <- c("(Intercept)" = "Intercept", "PARTY_affiliationRepublican" = "Republican Party")
 modelsummary::modelsummary(list(sing_Regression), coef_map = var_labs, gof_map= ("nobs"))
 ```
+
 Average support for opening houses of worship is negative 0.488 when the main explanatory variable (Party affiliation) is zero. This means, when a particular respondent is not a Republican their predicted support for opening houses of worship is negative and it can be predicted that they would want places of worship to remain closed, given all else remains constant.  
 
 For the coefficient on party affiliation, since the main explanatory variables used here is a binary, our model predicts that if a person goes from being a non-Republican (in this case a democrat) to a Republican, their predicted support for opening up places of worship during the pandemic would increase by 0.528 points, given all else remains constant. This means that on average becoming a Republican is predicted to be associated with a rise in support for opening places of worship, given all else remains unchanged. 
